@@ -86,8 +86,11 @@ def require_permission_or_self(permission_code: PermissionCodeEnum | str):
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db),
     ) -> User:
+        if current_user.id == user_id:
+            return current_user
+
         resolve_tenant_for_user(request, current_user, db)
-        if current_user.is_superuser or current_user.id == user_id:
+        if current_user.is_superuser:
             return current_user
 
         permission_service = PermissionService(db)
