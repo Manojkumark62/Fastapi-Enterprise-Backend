@@ -17,5 +17,5 @@ def pytest_configure(config):
     by core.config.Settings are available at module import time.
     """
     os.environ.setdefault("SECRET_KEY", "test-secret-key-must-be-at-least-32-characters-long-for-testing!")
-    os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
+    os.environ.setdefault("DATABASE_URL", "mysql+pymysql://root:testpassword@127.0.0.1:3306/test_db")
     os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
