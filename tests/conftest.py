@@ -12,9 +12,9 @@ if str(project_root) not in sys.path:
 def pytest_configure(config):
     """Configure test environment before any test collection.
     
-    Set environment variables that are required by core.config.Settings
-    at module import time. This ensures settings initialization doesn't fail
-    during test discovery.
+    This hook runs before pytest collects tests and before any module imports
+    that might instantiate settings. It ensures environment variables required
+    by core.config.Settings are available at module import time.
     """
     os.environ.setdefault("SECRET_KEY", "test-secret-key-must-be-at-least-32-characters-long-for-testing!")
     os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
