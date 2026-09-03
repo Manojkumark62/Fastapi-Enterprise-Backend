@@ -6,12 +6,26 @@ on:
 
 env:
   SECRET_KEY: test-secret-key-must-be-at-least-32-characters-long-for-testing!
-  DATABASE_URL: sqlite:///./test.db
+  DATABASE_URL: mysql+pymysql://root:testpassword@127.0.0.1:3306/test_db
   REDIS_URL: redis://localhost:6379/0
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: testpassword
+          MYSQL_DATABASE: test_db
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 3306:3306
     
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +37,20 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       
-      - name: Run Python syntax check
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h "127.0.0.1" -u root -p"testpassword" &> /dev/null; then
+              echo "MySQL is ready"
+              exit 0
+            fi
+            echo "Waiting for MySQL..."
+            sleep 1
+          done
+          echo "MySQL failed to start"
+          exit 1
+      
+      - name: Check Python syntax
         run: python -m compileall -q .
       
       - name: Run tests
