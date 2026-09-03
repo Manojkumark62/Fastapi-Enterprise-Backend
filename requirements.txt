@@ -1,0 +1,30 @@
+# Core framework
+fastapi
+uvicorn
+python-multipart
+
+# Settings / validation
+pydantic
+pydantic-settings
+python-dotenv
+email-validator
+
+# Database
+sqlalchemy
+pymysql
+aiomysql
+psycopg[binary]
+asyncpg
+alembic
+
+# Auth / security 
+python-jose[cryptography]
+bcrypt
+
+# Redis
+redis
+
+# Testing
+pytest
+pytest-asyncio
+httpx

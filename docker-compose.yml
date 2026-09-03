@@ -1,0 +1,48 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      DATABASE_URL: mysql+pymysql://enterprise:enterprise@db:3306/enterprise
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  worker:
+    build: .
+    command: ["python", "-c", "from jobs.worker import run_maintenance; print(run_maintenance())"]
+    env_file: .env
+    environment:
+      DATABASE_URL: mysql+pymysql://enterprise:enterprise@db:3306/enterprise
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: enterprise
+      MYSQL_USER: enterprise
+      MYSQL_PASSWORD: enterprise
+      MYSQL_ROOT_PASSWORD: root-enterprise
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uenterprise", "-penterprise"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
